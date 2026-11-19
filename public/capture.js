@@ -30,6 +30,20 @@
     return "Could not start: " + ((err && err.message) || "unknown error");
   }
 
+  // Mean luminance (0 = black, 255 = white) of a canvas, sampled at low
+  // resolution. A covered lens or closed privacy shutter gives a value near 8.
+  function averageBrightness(source) {
+    const probe = el("canvas");
+    probe.width = 64;
+    probe.height = 36;
+    const ctx = probe.getContext("2d");
+    ctx.drawImage(source, 0, 0, probe.width, probe.height);
+    const data = ctx.getImageData(0, 0, probe.width, probe.height).data;
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 4) sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+    return sum / (data.length / 4);
+  }
+
   function stopStream(stream) {
     if (stream) stream.getTracks().forEach((t) => t.stop());
   }
@@ -97,6 +111,7 @@
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext("2d").drawImage(video, 0, 0);
+        const tooDark = averageBrightness(canvas) < 20;
         canvas.toBlob(
           (blob) => {
             if (!blob) {
@@ -105,6 +120,9 @@
             }
             setInputFile(input, new File([blob], "camera-photo.jpg", { type: "image/jpeg" }));
             close();
+            msg.textContent = tooDark
+              ? "This photo is almost black. Check that the camera's privacy shutter is open and the lens isn't covered, then take it again."
+              : "";
           },
           "image/jpeg",
           0.92
