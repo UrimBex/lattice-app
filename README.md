@@ -12,6 +12,58 @@ Three templates ship with it:
 
 Narration can be an uploaded audio clip or typed text synthesized to speech ("AI narration"), with optional burned-in captions.
 
+## Demo
+
+A 4-slide deck ([`examples/sample-deck.pdf`](examples/sample-deck.pdf)) turned into a narrated 41-second video by the `pdf-presentation` template, with a title card, per-slide narration (offline text-to-speech), synced captions and a closing card:
+
+![Demo: PDF deck rendered to a narrated, captioned video](docs/demo.gif)
+
+*Preview of the first 20 seconds. [Download the full video with narration (MP4, 3 MB)](docs/demo.mp4).*
+
+![A rendered slide with its caption and slide counter](docs/demo-slide.png)
+
+**Reproduce it:** start the app, open the "Turn a deck into a narrated video" form, and set:
+
+- Title card: `Q3 Product Roadmap`
+- Slide deck PDF: `examples/sample-deck.pdf`
+- Per-slide script (blank line between slides):
+
+  ```
+  Welcome to the quarterly roadmap update. Here is what shipped, what we learned, and what comes next.
+
+  Quarter three landed ahead of plan. We released twelve features, up from eight last quarter, with ninety eight percent on time delivery.
+
+  Customers told us they want it faster. Setup time is the top complaint, and templates beat blank canvases.
+
+  Next up is the mobile release. Beta starts in October, with a public launch in December.
+  ```
+
+- Check **Burn captions**, then **Render presentation**. It takes about 20 seconds.
+
+Or from the command line:
+
+```
+curl -X POST http://127.0.0.1:4173/api/render/presentation \
+  --form-string "title=Q3 Product Roadmap" \
+  -F "deck_pdf=@examples/sample-deck.pdf;type=application/pdf" \
+  --form-string "auto_narrate=on" \
+  --form-string "burn_captions=on"
+```
+
+(`auto_narrate` reads each slide's own text aloud, so no script is needed.)
+
+## Screenshots
+
+The web UI has one form per template. Each form posts to the API and shows the rendered video in the panel beside it once the job finishes.
+
+**PDF presentation form**
+
+![PDF presentation form](docs/ui-presentation.png)
+
+**Welcome video form**
+
+![Welcome video form](docs/ui-welcome.png)
+
 ## Requirements
 
 - **Node.js 18+**
