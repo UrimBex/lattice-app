@@ -1,0 +1,21 @@
+{
+  "template_id": "welcome-video",
+  "version": 1,
+  "duration_ms": 10000,
+  "fps": 30,
+  "resolution": { "width": 1280, "height": 720 },
+  "variables": [
+    { "key": "first_name", "type": "string", "required": true, "max_length": 24 },
+    { "key": "avatar_image", "type": "image_file", "required": false },
+    { "key": "voice_audio", "type": "audio_file", "required": false },
+    { "key": "cta_label", "type": "string", "required": true, "max_length": 20, "default": "Get started" }
+  ],
+  "layers": [
+    { "id": "base_video", "type": "video", "static": true, "start_ms": 0, "end_ms": 10000 },
+    { "id": "text_name", "type": "text", "binding": "{{first_name}}", "start_ms": 500, "end_ms": 9500 },
+    { "id": "image_avatar", "type": "image", "binding": "{{avatar_image}}", "optional": true, "start_ms": 2000, "end_ms": 10000 },
+    { "id": "audio_music", "type": "audio", "static": true, "start_ms": 0, "end_ms": 10000 },
+    { "id": "audio_voice", "type": "audio", "binding": "{{voice_audio}}", "optional": true, "start_ms": 2000, "end_ms": 5500 },
+    { "id": "end_card", "type": "text", "binding": "{{cta_label}}", "start_ms": 8500, "end_ms": 10000 }
+  ]
+}

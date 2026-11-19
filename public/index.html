@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lattice — render a test video</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F6F7; --surface:#FFFFFF; --surface-2:#EBEDEF;
+    --ink:#1B2027; --muted:#5B6573; --line:#DCE0E4;
+    --accent:#157F5A; --accent-ink:#0E5A3F; --accent-soft:#DCEFE7;
+    --warn:#A9670C; --warn-soft:#F6E7CF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12151A; --surface:#1A1E24; --surface-2:#20242B;
+      --ink:#E7EAED; --muted:#9AA4B0; --line:#2A2F38;
+      --accent:#3DDC97; --accent-ink:#B7F5DA; --accent-soft:rgba(61,220,151,.14);
+      --warn:#E0A64D; --warn-soft:rgba(224,166,77,.14);
+    }
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"Source Sans 3",sans-serif;margin:0;padding:32px 20px 64px;}
+  .wrap{max-width:920px;margin:0 auto;}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  h1{font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:clamp(2rem,4vw,2.7rem);margin:0 0 6px;}
+  p.lede{color:var(--muted);max-width:60ch;margin:0 0 28px;font-size:15px;}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;}
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 6px;}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px;}
+  input[type=text],input[type=file],textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+    background:var(--surface-2);color:var(--ink);font-family:inherit;font-size:14.5px;
+  }
+  textarea{resize:vertical;min-height:64px;}
+  input[type=text]:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .checkbox-field label{display:flex;align-items:center;gap:8px;font-weight:500;font-size:14px;}
+  .checkbox-field input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);}
+  .field{margin-bottom:18px;}
+  button{
+    font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;letter-spacing:.03em;
+    background:var(--accent);color:#06231A;border:none;border-radius:8px;padding:12px 20px;
+    cursor:pointer;width:100%;
+  }
+  button:disabled{opacity:.55;cursor:not-allowed;}
+  .status-frame{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;}
+  .status-frame video{width:100%;border-radius:8px;background:#000;}
+  .pill{font-family:"IBM Plex Mono",monospace;font-size:12px;padding:4px 10px;border-radius:20px;background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
+  .pill.warn{background:var(--warn-soft);color:var(--warn);}
+  .muted{color:var(--muted);font-size:13px;}
+  .log{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);text-align:left;width:100%;background:var(--surface-2);border-radius:8px;padding:10px 12px;max-height:120px;overflow:auto;}
+  .placeholder{color:var(--muted);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Local Phase 1 build — real FFmpeg render</div>
+  <h1>Render a test video</h1>
+  <p class="lede">Submits through the same ingestion → queue → render → deliver path described in the architecture doc, running against the <code>welcome-video</code> blueprint on this machine.</p>
+
+  <div class="grid">
+    <div class="card">
+      <form id="renderForm" data-endpoint="/api/render">
+        <div class="field">
+          <label for="first_name">First name <span class="muted">(required, ≤24 chars)</span></label>
+          <input type="text" id="first_name" name="first_name" maxlength="24" placeholder="Uri" required />
+        </div>
+        <div class="field">
+          <label for="cta_label">CTA label</label>
+          <input type="text" id="cta_label" name="cta_label" maxlength="20" placeholder="Get started" value="Get started" />
+        </div>
+        <div class="field">
+          <label for="avatar_image">Avatar image <span class="muted">(optional)</span></label>
+          <input type="file" id="avatar_image" name="avatar_image" accept="image/*" />
+          <div class="hint">Composited as a dynamic image layer from 2s–10s.</div>
+        </div>
+        <div class="field">
+          <label for="voice_audio">Voice line <span class="muted">(optional — uploaded file)</span></label>
+          <input type="file" id="voice_audio" name="voice_audio" accept="audio/*" />
+          <div class="hint">Plays 2s–5.5s; music bed ducks automatically underneath.</div>
+        </div>
+        <div class="field">
+          <label for="narration_script">Or generate narration with AI <span class="muted">(optional, ≤600 chars)</span></label>
+          <textarea id="narration_script" name="narration_script" rows="3" maxlength="600" placeholder="Type a script and it's synthesized into speech — takes priority over an uploaded voice line."></textarea>
+        </div>
+        <div class="field checkbox-field">
+          <label><input type="checkbox" name="burn_captions" /> Burn captions from the script</label>
+          <div class="hint">Only works when the script above is filled in.</div>
+        </div>
+        <button class="submitBtn" type="submit">Render video</button>
+      </form>
+    </div>
+
+    <div class="card status-frame" data-status-for="renderForm">
+      <div class="placeholder">Your rendered video will appear here.</div>
+    </div>
+  </div>
+
+  <div style="height:44px"></div>
+  <div class="eyebrow"><span class="dot"></span>Contract walkthrough template</div>
+  <h1 style="font-size:clamp(1.6rem,3vw,2.1rem);">Present a contract</h1>
+  <p class="lede">Upload a PDF — each page is composited into the video as its own timed layer, back to back, with an optional narration track ducking the music underneath.</p>
+
+  <div class="grid">
+    <div class="card">
+      <form id="contractForm" data-endpoint="/api/render/contract">
+        <div class="field">
+          <label for="c_first_name">Recipient name <span class="muted">(required, ≤24 chars)</span></label>
+          <input type="text" id="c_first_name" name="first_name" maxlength="24" placeholder="Ada" required />
+        </div>
+        <div class="field">
+          <label for="c_cta_label">CTA label</label>
+          <input type="text" id="c_cta_label" name="cta_label" maxlength="24" placeholder="Review & sign" value="Review & sign" />
+        </div>
+        <div class="field">
+          <label for="contract_pdf">Contract PDF <span class="muted">(required, ≤20MB)</span></label>
+          <input type="file" id="contract_pdf" name="contract_pdf" accept="application/pdf" required />
+          <div class="hint">First 6 pages are rendered, ~2.2s each.</div>
+        </div>
+        <div class="field">
+          <label for="c_voice_audio">Narration <span class="muted">(optional — uploaded file)</span></label>
+          <input type="file" id="c_voice_audio" name="voice_audio" accept="audio/*" />
+          <div class="hint">Plays under the whole flythrough; music ducks automatically.</div>
+        </div>
+        <div class="field">
+          <label for="c_narration_script">Or generate narration with AI <span class="muted">(optional, ≤600 chars)</span></label>
+          <textarea id="c_narration_script" name="narration_script" rows="3" maxlength="600" placeholder="e.g. Hi Ada, this agreement covers the terms of your new contract. Please review each page before signing."></textarea>
+        </div>
+        <div class="field checkbox-field">
+          <label><input type="checkbox" name="burn_captions" /> Burn captions from the script</label>
+          <div class="hint">Only works when the script above is filled in.</div>
+        </div>
+        <button class="submitBtn" type="submit">Render contract video</button>
+      </form>
+    </div>
+
+    <div class="card status-frame" data-status-for="contractForm">
+      <div class="placeholder">Your rendered video will appear here.</div>
+    </div>
+  </div>
+
+  <div style="height:44px"></div>
+  <div class="eyebrow"><span class="dot"></span>PDF presentation template</div>
+  <h1 style="font-size:clamp(1.6rem,3vw,2.1rem);">Turn a deck into a narrated video</h1>
+  <p class="lede">Upload a slide deck (PDF, up to 20 pages). Each slide's on-screen time is sized to its own narration clip — write one paragraph per slide, or let it read each slide's own text aloud. Output is 1280×720 H.264/AAC MP4, ready to upload to YouTube.</p>
+
+  <div class="grid">
+    <div class="card">
+      <form id="presentationForm" data-endpoint="/api/render/presentation">
+        <div class="field">
+          <label for="p_title">Title card <span class="muted">(optional, ≤60 chars)</span></label>
+          <input type="text" id="p_title" name="title" maxlength="60" placeholder="Q3 Product Roadmap" />
+        </div>
+        <div class="field">
+          <label for="p_cta_label">Closing text</label>
+          <input type="text" id="p_cta_label" name="cta_label" maxlength="30" placeholder="Thanks for watching!" value="Thanks for watching!" />
+        </div>
+        <div class="field">
+          <label for="deck_pdf">Slide deck PDF <span class="muted">(required, ≤20MB, first 20 pages)</span></label>
+          <input type="file" id="deck_pdf" name="deck_pdf" accept="application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="p_narration_script">Per-slide script <span class="muted">(optional, ≤6000 chars)</span></label>
+          <textarea id="p_narration_script" name="narration_script" rows="5" maxlength="6000" placeholder="Slide 1's narration.&#10;&#10;Slide 2's narration.&#10;&#10;Slide 3's narration — one blank line between each slide, in order."></textarea>
+          <div class="hint">Separate each slide's narration with a blank line. Takes priority over auto-narrate below.</div>
+        </div>
+        <div class="field checkbox-field">
+          <label><input type="checkbox" name="auto_narrate" /> Auto-narrate by reading each slide's own text</label>
+          <div class="hint">Used only for slides with no paragraph in the script above (or when the script is left empty).</div>
+        </div>
+        <div class="field checkbox-field">
+          <label><input type="checkbox" name="burn_captions" /> Burn captions for narrated slides</label>
+        </div>
+        <button class="submitBtn" type="submit">Render presentation</button>
+      </form>
+    </div>
+
+    <div class="card status-frame" data-status-for="presentationForm">
+      <div class="placeholder">Your rendered video will appear here.</div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

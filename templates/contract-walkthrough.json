@@ -1,0 +1,22 @@
+{
+  "template_id": "contract-walkthrough",
+  "version": 1,
+  "fps": 30,
+  "resolution": { "width": 1280, "height": 720 },
+  "seconds_per_page": 2.2,
+  "max_pages": 6,
+  "variables": [
+    { "key": "first_name", "type": "string", "required": true, "max_length": 24 },
+    { "key": "contract_pdf", "type": "pdf_file", "required": true },
+    { "key": "voice_audio", "type": "audio_file", "required": false },
+    { "key": "cta_label", "type": "string", "required": false, "max_length": 24, "default": "Review & sign" }
+  ],
+  "layers": [
+    { "id": "base_video", "type": "video", "static": true },
+    { "id": "text_name", "type": "text", "binding": "{{first_name}}", "start_ms": 300, "end_ms": 2000 },
+    { "id": "document_pages", "type": "image_sequence", "binding": "{{contract_pdf}}", "note": "one dynamic image layer per PDF page, laid out back-to-back — duration expands with page count" },
+    { "id": "audio_music", "type": "audio", "static": true },
+    { "id": "audio_voice", "type": "audio", "binding": "{{voice_audio}}", "optional": true, "start_ms": 500 },
+    { "id": "end_card", "type": "text", "binding": "{{cta_label}}" }
+  ]
+}

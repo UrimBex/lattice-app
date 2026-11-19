@@ -1,0 +1,25 @@
+{
+  "template_id": "pdf-presentation",
+  "version": 1,
+  "fps": 30,
+  "resolution": { "width": 1280, "height": 720 },
+  "max_pages": 20,
+  "min_page_seconds": 2.2,
+  "max_page_seconds": 15,
+  "silent_page_seconds": 3.0,
+  "variables": [
+    { "key": "title", "type": "string", "required": false, "max_length": 60 },
+    { "key": "deck_pdf", "type": "pdf_file", "required": true },
+    { "key": "narration_script", "type": "string", "required": false, "max_length": 6000, "note": "one paragraph per slide, blank-line separated, in slide order" },
+    { "key": "auto_narrate", "type": "boolean", "required": false, "note": "read each slide's extracted PDF text aloud when no manual script is given" },
+    { "key": "cta_label", "type": "string", "required": false, "max_length": 30, "default": "Thanks for watching!" }
+  ],
+  "layers": [
+    { "id": "base_video", "type": "video", "static": true },
+    { "id": "title_card", "type": "text", "binding": "{{title}}", "optional": true },
+    { "id": "slide_pages", "type": "image_sequence", "binding": "{{deck_pdf}}", "note": "one dynamic image layer per slide — each page's on-screen duration matches its own narration clip length, not a fixed slot" },
+    { "id": "audio_music", "type": "audio", "static": true },
+    { "id": "audio_narration", "type": "audio", "binding": "{{narration_script}}", "optional": true, "note": "per-slide clips concatenated back to back, not one continuous track" },
+    { "id": "end_card", "type": "text", "binding": "{{cta_label}}" }
+  ]
+}
