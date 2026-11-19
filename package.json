@@ -2,6 +2,7 @@
   "name": "lattice-app",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Personalized video render engine: fills layered video blueprints with per-recipient data and renders MP4s with FFmpeg.",
   "main": "server.js",
   "engines": {
