@@ -47,6 +47,27 @@
     cursor:pointer;width:100%;
   }
   button:disabled{opacity:.55;cursor:not-allowed;}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* camera / microphone capture controls that sit under a file input */
+  .capture-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;}
+  button.btn-secondary{
+    width:auto;padding:8px 14px;font-size:12px;background:transparent;color:var(--ink);
+    border:1px solid var(--line);
+  }
+  button.btn-secondary:hover:not(:disabled){border-color:var(--accent);color:var(--accent-ink);}
+  button.btn-secondary.recording{border-color:var(--warn);color:var(--warn);background:var(--warn-soft);}
+  .rec-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:6px;animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:.25;}}
+  @media (prefers-reduced-motion: reduce){.rec-dot{animation:none;}}
+  .capture-timer{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
+  .capture-panel{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface-2);}
+  .capture-panel video{width:100%;max-height:280px;border-radius:8px;background:#000;display:block;transform:scaleX(-1);}
+  .capture-panel .capture-row{margin-top:10px;}
+  .capture-preview{margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .capture-preview img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+  .capture-preview audio{height:36px;max-width:100%;}
+  .capture-msg{font-size:12px;color:var(--warn);margin-top:6px;}
   .status-frame{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;}
   .status-frame video{width:100%;border-radius:8px;background:#000;}
   .pill{font-family:"IBM Plex Mono",monospace;font-size:12px;padding:4px 10px;border-radius:20px;background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
@@ -74,13 +95,13 @@
           <input type="text" id="cta_label" name="cta_label" maxlength="20" placeholder="Get started" value="Get started" />
         </div>
         <div class="field">
-          <label for="avatar_image">Avatar image <span class="muted">(optional)</span></label>
-          <input type="file" id="avatar_image" name="avatar_image" accept="image/*" />
+          <label for="avatar_image">Avatar image <span class="muted">(optional — upload or take a photo)</span></label>
+          <input type="file" id="avatar_image" name="avatar_image" accept="image/*" data-capture="photo" />
           <div class="hint">Composited as a dynamic image layer from 2s–10s.</div>
         </div>
         <div class="field">
-          <label for="voice_audio">Voice line <span class="muted">(optional — uploaded file)</span></label>
-          <input type="file" id="voice_audio" name="voice_audio" accept="audio/*" />
+          <label for="voice_audio">Voice line <span class="muted">(optional — upload or record)</span></label>
+          <input type="file" id="voice_audio" name="voice_audio" accept="audio/*" data-capture="audio" />
           <div class="hint">Plays 2s–5.5s; music bed ducks automatically underneath.</div>
         </div>
         <div class="field">
@@ -122,8 +143,8 @@
           <div class="hint">First 6 pages are rendered, ~2.2s each.</div>
         </div>
         <div class="field">
-          <label for="c_voice_audio">Narration <span class="muted">(optional — uploaded file)</span></label>
-          <input type="file" id="c_voice_audio" name="voice_audio" accept="audio/*" />
+          <label for="c_voice_audio">Narration <span class="muted">(optional — upload or record)</span></label>
+          <input type="file" id="c_voice_audio" name="voice_audio" accept="audio/*" data-capture="audio" />
           <div class="hint">Plays under the whole flythrough; music ducks automatically.</div>
         </div>
         <div class="field">
@@ -185,6 +206,7 @@
   </div>
 </div>
 
+<script src="capture.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -60,7 +60,7 @@ The web UI has one form per template. Each form posts to the API and shows the r
 
 ![PDF presentation form](docs/ui-presentation.png)
 
-**Welcome video form**
+**Welcome video form** (upload, **Take photo** and **Record voice** for the avatar and voice line)
 
 ![Welcome video form](docs/ui-welcome.png)
 
@@ -86,6 +86,8 @@ npm start
 ```
 
 Open http://127.0.0.1:4173. The first launch pre-renders a cached base plate and music bed (a few seconds); later renders reuse them. Startup prints a warning for any missing dependency.
+
+Wherever the UI asks for an avatar image or a voice clip you can **upload a file, take a photo with your camera, or record your voice with your microphone**. The capture is placed in the form like any uploaded file, so the API is unchanged. Camera and microphone access needs `localhost`/`127.0.0.1` or HTTPS, so it will not work if you expose the app over plain HTTP on a LAN address. Recordings stop automatically at 60 seconds.
 
 ```
 npm test
